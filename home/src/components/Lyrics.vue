@@ -146,6 +146,18 @@
 			this.setup_word_style();
 		}
 
+		private ctx_translate(start_pos: number, i: number): void {
+			if (!this.draw_style.rotate) {
+				this.ctx.translate(win.w2 + start_pos, win.h2 + Math.abs(i - this.text.length/2) * 5);
+				return;
+			}
+			if (this.draw_position.side) {
+				this.ctx.translate(win.w2 + start_pos, win.h2 - (i - this.text.length/2) * 10);
+			} else {
+				this.ctx.translate(win.w2 + start_pos, win.h2 + (i - this.text.length/2) * 10);
+			}
+		}
+
 		private draw_text(progress: number): void {
 			let start_pos = - this.ctx.measureText(this.text).width/2;
 			for (let i=0; i<this.text.length; ++i) {
@@ -153,15 +165,7 @@
 				const c_w = this.ctx.measureText(c).width;
 
 				this.ctx.save();
-				if (this.draw_style.rotate) {
-					if (this.draw_position.side) {
-						this.ctx.translate(win.w2 + start_pos, win.h2 - (i - this.text.length/2) * 10);
-					} else {
-						this.ctx.translate(win.w2 + start_pos, win.h2 + (i - this.text.length/2) * 10);
-					}
-				} else {
-					this.ctx.translate(win.w2 + start_pos, win.h2 + Math.abs(i - this.text.length/2) * 5);
-				}
+				this.ctx_translate(start_pos, i);
 				this.ctx.rotate((i - this.text.length/2) * 5 * progress * Math.PI / 180);
 				if (this.draw_style.fill) {
 					if (i === this.draw_position.fill_square) {
@@ -179,15 +183,7 @@
 				this.ctx.restore();
 
 				this.ctx.save();
-				if (this.draw_style.rotate) {
-					if (this.draw_position.side) {
-						this.ctx.translate(win.w2 + start_pos, win.h2 - (i - this.text.length/2) * 10);
-					} else {
-						this.ctx.translate(win.w2 + start_pos, win.h2 + (i - this.text.length/2) * 10);
-					}
-				} else {
-					this.ctx.translate(win.w2 + start_pos, win.h2 + Math.abs(i - this.text.length/2) * 5);
-				}
+				this.ctx_translate(start_pos, i);
 				this.ctx.rotate((i - this.text.length/2) * 5 * progress * Math.PI / 180);
 				if (this.draw_style.outline) {
 					this.ctx.strokeText(c, 0, 0);
@@ -247,7 +243,7 @@
 		}
 
 		private draw(progress: number): void {
-			this.ctx.strokeStyle = colorTransition(progress);
+			this.ctx.strokeStyle = colorTransition(this.r ? progress * Math.abs(this.d.x) : progress * Math.abs(this.d.y));
 			this.ctx.beginPath();
 			this.ctx.moveTo(this.p_1.x, this.p_1.y);
 			this.ctx.lineTo(this.p_2.x, this.p_2.y);
@@ -255,7 +251,7 @@
 		}
 
 		public update(progress): void {
-			const ease_progress =  easeOutQuint(progress);
+			const ease_progress = easeOutQuint(progress);
 			const speed_x = this.speed * this.d.x * ease_progress;
 			const speed_y = this.speed * this.d.y * ease_progress;
 			if (this.r) {
@@ -272,9 +268,10 @@
 	class Scene {
 		ctx: CanvasRenderingContext2D;
 		progress: number;
-		speed: number;
 		lyrics_index: number;
 		lyrics: string[];
+		lyrics_time: number[];
+		speed: number;
 		symbols: string[];
 		word: Word;
 		lines: Line[];
@@ -283,25 +280,24 @@
 		constructor(ctx: CanvasRenderingContext2D) {
 			this.ctx = ctx;
 			this.progress = 0.0;
-			this.speed = 0.01;
 			this.lyrics_index = 0;
 			this.lyrics = [
-				'',
 				'どうでもいい',
-				'ような',
-				'夜だけど',
+				'ような夜だけど',
 				'響めき',
 				'煌めきと君も',
-				'まだ止まった 刻む針も',
-				'入り浸った 散らかる部屋も',
-				'変わらないね 思い出しては',
-				'二人 歳を重ねてた'
 			];
-			this.symbols = [ '🟄', '★', '🟆', '◉', '⚫', '■'];
-			this.word = new Word(this.lyrics[this.lyrics_index], this.ctx, color_1, color_2);
+			this.lyrics_time = [
+				50,
+				75,
+				25,
+				100,
+			]
+			this.speed = 1 / this.lyrics_time[this.lyrics_index];
+			this.symbols = [ '🟄', '★', '🟆', '▼', '⚫', '■'];
+			this.word = new Word(this.lyrics[0], this.ctx, color_1, color_2);
 			this.lines = [];
 			this.shapes = [];
-			this.next_word();
 			this.reset_line();
 			this.reset_shapes();
 		}
@@ -309,11 +305,12 @@
 		private next_word(): void {
 			this.lyrics_index = (this.lyrics_index + 1) % this.lyrics.length;
 			this.word.set_word(this.lyrics[this.lyrics_index], this.ctx);
+			this.speed = 1 / this.lyrics_time[this.lyrics_index];
 		}
 
 		private reset_line(): void {
 			this.lines = [];
-			for (let i=0; i<get_random(1,5); i++)
+			for (let i=0; i<get_random(1,8); i++)
 				this.lines.push(new Line(this.ctx));
 		}
 
@@ -325,9 +322,9 @@
 		}
 
 		private draw(progress: number): void {
-			this.word.update(this.progress);
 			for (let l of this.lines) l.update(this.progress);
 			//for (let s of this.shapes) s.update(this.progress);
+			this.word.update(this.progress);
 			this.progress += this.speed;
 		}
 
