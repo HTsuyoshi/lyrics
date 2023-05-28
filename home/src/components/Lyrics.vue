@@ -97,7 +97,7 @@
 		off: number;
 		invert: boolean;
 		draw_style: {
-			fill: boolen,
+			fill: boolean,
 			outline: boolean,
 			stroke_square: boolean,
 			fill_square: booelan,
@@ -146,15 +146,18 @@
 			this.setup_word_style();
 		}
 
-		private ctx_translate(start_pos: number, i: number): void {
+		private ctx_translate(start_pos: number, progress: number, i: number): void {
+			const x = win.w2 + start_pos;
+			const y = win.h2 + this.actual_font_size/4;
+			const effect = (1 - progress);
 			if (!this.draw_style.rotate) {
-				this.ctx.translate(win.w2 + start_pos, win.h2 + Math.abs(i - this.text.length/2) * 5);
+				this.ctx.translate(x, y + Math.pow(Math.abs(i), 2) * 2 * effect);
 				return;
 			}
 			if (this.draw_position.side) {
-				this.ctx.translate(win.w2 + start_pos, win.h2 - (i - this.text.length/2) * 10);
+				this.ctx.translate(x, y - i * 10 * effect);
 			} else {
-				this.ctx.translate(win.w2 + start_pos, win.h2 + (i - this.text.length/2) * 10);
+				this.ctx.translate(x, y + i * 10 * effect);
 			}
 		}
 
@@ -165,8 +168,8 @@
 				const c_w = this.ctx.measureText(c).width;
 
 				this.ctx.save();
-				this.ctx_translate(start_pos, i);
-				this.ctx.rotate((i - this.text.length/2) * 5 * progress * Math.PI / 180);
+				this.ctx_translate(start_pos, progress, i - this.text.length/2);
+				//this.ctx.rotate((i - this.text.length/2) * progress * Math.PI / 180);
 				if (this.draw_style.fill) {
 					if (i === this.draw_position.fill_square) {
 						this.ctx.fillRect(0, -this.actual_font_size * 0.8, this.actual_font_size * 0.9, this.actual_font_size * 0.9);
@@ -183,8 +186,8 @@
 				this.ctx.restore();
 
 				this.ctx.save();
-				this.ctx_translate(start_pos, i);
-				this.ctx.rotate((i - this.text.length/2) * 5 * progress * Math.PI / 180);
+				this.ctx_translate(start_pos, progress, i - this.text.length/2);
+				//this.ctx.rotate((i - this.text.length/2) * progress * Math.PI / 180);
 				if (this.draw_style.outline) {
 					this.ctx.strokeText(c, 0, 0);
 				}
@@ -265,6 +268,62 @@
 		}
 	}
 
+	class Background {
+		ctx: CanvasRenderingContext2D;
+		lines: Line[];
+		draw_style: {
+			lines: boolean,
+			vertical: boolean
+		};
+		draw_position: {
+		};
+
+		constructor(ctx: CanvasRenderingContext2D) {
+			this.ctx = ctx;
+			this.lines = [];
+			this.reset_line();
+			this.setup_style();
+		}
+
+		private setup_style(): void {
+			this.draw_style = {
+				lines: (Math.random() >= 0.5),
+				vertical: (Math.random() >= 0.5),
+			};
+		}
+
+		public reset(): void {
+			this.setup_style();
+			if (this.draw_style.lines) this.reset_line();
+		}
+
+		private reset_line(): void {
+			this.lines = [];
+			for (let i=0; i<get_random(1,8); i++)
+				this.lines.push(new Line(this.ctx));
+		}
+
+		private draw_vertical(progress: number): void {
+			const rect_size = easeOutCubic(progress) * win.h * 0.2;
+			this.ctx.fillRect(0, 0, win.w, win.h);
+			this.ctx.fillStyle = color_1;
+			this.ctx.fillRect(0, win.h2 - rect_size/2, win.w, rect_size);
+			this.ctx.fillStyle = color_2;
+		}
+
+		private draw(progress: number) {
+			this.ctx.clearRect(0, 0, win.w, win.h);
+			if (this.draw_style.vertical)
+				this.draw_vertical(progress);
+			if (this.draw_style.lines)
+				for (let l of this.lines) l.update(progress);
+		}
+
+		public update(progress: number) {
+			this.draw(progress);
+		}
+	}
+
 	class Scene {
 		ctx: CanvasRenderingContext2D;
 		progress: number;
@@ -274,7 +333,7 @@
 		speed: number;
 		symbols: string[];
 		word: Word;
-		lines: Line[];
+		background: Background;
 		shapes: Shape[];
 
 		constructor(ctx: CanvasRenderingContext2D) {
@@ -296,9 +355,8 @@
 			this.speed = 1 / this.lyrics_time[this.lyrics_index];
 			this.symbols = [ '🟄', '★', '🟆', '▼', '⚫', '■'];
 			this.word = new Word(this.lyrics[0], this.ctx, color_1, color_2);
-			this.lines = [];
+			this.background = new Background(this.ctx);
 			this.shapes = [];
-			this.reset_line();
 			this.reset_shapes();
 		}
 
@@ -306,12 +364,6 @@
 			this.lyrics_index = (this.lyrics_index + 1) % this.lyrics.length;
 			this.word.set_word(this.lyrics[this.lyrics_index], this.ctx);
 			this.speed = 1 / this.lyrics_time[this.lyrics_index];
-		}
-
-		private reset_line(): void {
-			this.lines = [];
-			for (let i=0; i<get_random(1,8); i++)
-				this.lines.push(new Line(this.ctx));
 		}
 
 		private reset_shapes(): void {
@@ -322,7 +374,7 @@
 		}
 
 		private draw(progress: number): void {
-			for (let l of this.lines) l.update(this.progress);
+			this.background.update(this.progress);
 			//for (let s of this.shapes) s.update(this.progress);
 			this.word.update(this.progress);
 			this.progress += this.speed;
@@ -332,8 +384,8 @@
 			if (this.progress > 1.0) this.speed = - this.speed;
 			if (this.progress < 0.0) {
 				this.speed = - this.speed;
+				this.background.reset();
 				this.next_word();
-				this.reset_line();
 				this.reset_shapes();
 			}
 			this.draw();
@@ -371,7 +423,6 @@
 		const scene: Scene = new Scene(ctx);
 
 		function draw_animation(): void {
-			ctx.clearRect(0, 0, win.w, win.h);
 			scene.update();
 			requestAnimationFrame(draw_animation);
 		}
