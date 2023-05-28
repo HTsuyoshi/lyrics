@@ -17,12 +17,12 @@ jobs:
           node-version: 16
 
       - name: Install dependencies
-        run: npm install ./canvas-playground
+        run: npm install ./home
 
       - name: Build website
         env:
           NODE_ENV: production
-        run: npm run build -C ./canvas-playground
+        run: npm run build -C ./home
 
       - name: Upload to S3
         env:

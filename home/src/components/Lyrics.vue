@@ -1,6 +1,6 @@
 <script setup lang='ts'>
 	import { ref, onMounted } from 'vue';
-	import { Word, Line, get_random, easeOutCubic, easeOutQuint, colorTransition, color_1, color_2 } from '../lib/Lyrics.ts'
+	import { get_random, easeOutCubic, easeOutQuint, colorTransition, color_1, color_2 } from '../lib/Lyrics.ts'
 
 	// Arguments
 	const props = defineProps({
@@ -53,7 +53,7 @@
 		constructor(text: string, ctx: CanvasRenderingContext2D) {
 			this.ctx = ctx;
 			this.text = text;
-			this.pos = { x: 0, y: 0 };
+			this.p = { x: 0, y: 0 };
 			this.font_size = Math.min(win.w / 5, win.h / 5);
 		}
 
@@ -100,25 +100,27 @@
 			fill: boolean,
 			outline: boolean,
 			stroke_square: boolean,
-			fill_square: booelan,
+			fill_square: boolean,
 			rotate: boolean
 		};
 		draw_position: {
 			stroke_square: number,
 			fill_square: number,
-			side: boolean
+			side: number
 		};
 
 		constructor(text: string, ctx: CanvasRenderingContext2D) {
 			this.ctx = ctx;
 			this.text = text;
-			this.pos = { x: 0, y: 0 };
+			this.p = { x: 0, y: 0 };
 			this.font_size = Math.min(win.w / 10, win.h / 10);
 			this.actual_font_size = 0;
 
 			// Settings
 			this.off = 3;
 			this.invert = false;
+			this.draw_style = { fill: false, outline: false, stroke_square: false, fill_square: false, rotate: false };
+			this.draw_position = { stroke_square: 0, fill_square: 0, side: 0 };
 			this.setup_word_style();
 		}
 
@@ -222,12 +224,6 @@
 		constructor(ctx: CanvasRenderingContext2D) {
 			this.ctx = ctx;
 			this.r = (Math.random() >= 0.5);
-			this.new_points();
-			this.new_direction();
-			this.speed = 5;
-		}
-
-		private new_points(): void {
 			this.p_1 = {
 				x: (this.r ? get_random(0, win.w) : 0),
 				y: (this.r ? 0 : get_random(0, win.h))
@@ -236,13 +232,11 @@
 				x: (this.r ? Math.random() * win.w : win.w),
 				y: (this.r ? win.h : Math.random() * win.h)
 			};
-		}
-
-		private new_direction(): void {
 			this.d = {
 				x: (Math.random() * 2) - 1,
 				y: (Math.random() * 2) - 1
 			};
+			this.speed = 5;
 		}
 
 		private draw(progress: number): void {
@@ -253,7 +247,7 @@
 			this.ctx.stroke();
 		}
 
-		public update(progress): void {
+		public update(progress: number): void {
 			const ease_progress = easeOutQuint(progress);
 			const speed_x = this.speed * this.d.x * ease_progress;
 			const speed_y = this.speed * this.d.y * ease_progress;
@@ -275,13 +269,12 @@
 			lines: boolean,
 			vertical: boolean
 		};
-		draw_position: {
-		};
 
 		constructor(ctx: CanvasRenderingContext2D) {
 			this.ctx = ctx;
 			this.lines = [];
 			this.reset_line();
+			this.draw_style = { lines: false, vertical: false};
 			this.setup_style();
 		}
 
@@ -354,7 +347,7 @@
 			]
 			this.speed = 1 / this.lyrics_time[this.lyrics_index];
 			this.symbols = [ '🟄', '★', '🟆', '▼', '⚫', '■'];
-			this.word = new Word(this.lyrics[0], this.ctx, color_1, color_2);
+			this.word = new Word(this.lyrics[0], this.ctx);
 			this.background = new Background(this.ctx);
 			this.shapes = [];
 			this.reset_shapes();
@@ -362,7 +355,7 @@
 
 		private next_word(): void {
 			this.lyrics_index = (this.lyrics_index + 1) % this.lyrics.length;
-			this.word.set_word(this.lyrics[this.lyrics_index], this.ctx);
+			this.word.set_word(this.lyrics[this.lyrics_index]);
 			this.speed = 1 / this.lyrics_time[this.lyrics_index];
 		}
 
@@ -373,7 +366,7 @@
 				this.shapes.push(new Shape(symbol, this.ctx));
 		}
 
-		private draw(progress: number): void {
+		private draw(): void {
 			this.background.update(this.progress);
 			//for (let s of this.shapes) s.update(this.progress);
 			this.word.update(this.progress);
