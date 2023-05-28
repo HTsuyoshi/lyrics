@@ -1,10 +1,28 @@
+<script setup lang='ts'>
+	import Button from '../components/Button.vue'
+</script>
+
 <template>
 	<div id='background'>
-		<router-link to='/lyrics/teste' >
-			asdf
-		</router-link>
+		<h1>
+			Lyrics visualization
+		</h1>
+		<div id='buttons'>
+			<Button link='/lyrics/night_dancer' title='Night Dancer'></Button>
+		</div>
 	</div>
 </template>
 
 <style scoped>
-</style>
+#background {
+	text-align: center;
+}
+#buttons {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+h1 {
+	color: #fff;
+}
+</style>;

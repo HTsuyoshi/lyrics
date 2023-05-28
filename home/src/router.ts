@@ -10,7 +10,7 @@ const router = createRouter({
 			component: Home
 		},
 		{
-			path: '/lyrics/teste',
+			path: '/lyrics/night_dancer',
 			name: 'Lyrics',
 			component: Lyrics
 		},
