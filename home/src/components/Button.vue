@@ -23,5 +23,6 @@ button {
 	background-color: transparent;
 	color: #fff;
 	padding: 1em;
+	margin: 1em;
 }
 </style>

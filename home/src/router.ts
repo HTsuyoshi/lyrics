@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from './pages/Home.vue'
-import Lyrics from './pages/Lyrics.vue'
+import Night_dancer from './pages/Night_dancer.vue'
+import Senbonzakura from './pages/Senbonzaruka.vue'
+import Cupid from './pages/Cupid.vue'
 
 const router = createRouter({
 	history: createWebHistory(),
@@ -11,8 +13,18 @@ const router = createRouter({
 		},
 		{
 			path: '/lyrics/night_dancer',
-			name: 'Lyrics',
-			component: Lyrics
+			name: 'Night_dancer',
+			component: Night_dancer
+		},
+		{
+			path: '/lyrics/senbonzakura',
+			name: 'Senbonzakura',
+			component: Senbonzakura
+		},
+		{
+			path: '/lyrics/cupid',
+			name: 'Cupid',
+			component: Cupid
 		},
 	]
 })
