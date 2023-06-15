@@ -86,7 +86,7 @@ export class Shape {
 
 		this.format = get_random(0, 2);
 		this.rotate = Math.random() * 2 + 1.0;
-		this.size = (Math.random() * 100) + 50;
+		this.size = (Math.random() * this.win.w/10) + this.win.w/10;
 		this.p = { x: this.win.w2, y: this.win.h2 };
 		this.d = { x: get_boolean(), y: invert_y };
 		this.distance = { x: get_random(this.win.w2/4, this.win.w2), y: get_random(this.win.h2/2, this.win.h2*3/4) };
