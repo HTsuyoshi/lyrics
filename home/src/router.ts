@@ -3,6 +3,7 @@ import Home from './pages/Home.vue'
 import Night_dancer from './pages/Night_dancer.vue'
 import Senbonzakura from './pages/Senbonzaruka.vue'
 import Cupid from './pages/Cupid.vue'
+import Paranoia from './pages/Paranoia.vue'
 
 const router = createRouter({
 	history: createWebHistory(),
@@ -25,6 +26,11 @@ const router = createRouter({
 			path: '/lyrics/cupid',
 			name: 'Cupid',
 			component: Cupid
+		},
+		{
+			path: '/lyrics/paranoia',
+			name: 'Paranoia',
+			component: Paranoia
 		},
 	]
 })

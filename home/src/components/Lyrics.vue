@@ -1,7 +1,7 @@
 <script setup lang='ts'>
 	import { ref, onMounted } from 'vue';
 	import { onBeforeRouteLeave } from 'vue-router';
-	import { Scene, color_1 } from '../lib/Lyrics.ts'
+	import { Scene } from '../lib/Lyrics.ts'
 
 	type Lyric = {
 		text: string;
@@ -30,6 +30,14 @@
 		},
 		font: {
 			type: String,
+			required: true
+		},
+		color_background: {
+			type: String,
+			required: true
+		},
+		colors: {
+			type: Array<string>,
 			required: true
 		},
 		url: {
@@ -63,7 +71,7 @@
 
 	let scene: Scene;
 	const audio = new Audio(props.url);
-	audio.volume = 0.1;
+	audio.volume = 0.5;
 	function start(): void {
 		if (audio.paused) audio.play();
 		else audio.pause();
@@ -89,7 +97,7 @@
 		canvas.width  = win.w;
 		canvas.height = win.h;
 
-		canvas.style.background = color_1;
+		canvas.style.background = props.color_background;
 
 		// Events
 		if (props.fullscreen) {
@@ -106,7 +114,7 @@
 			)
 		}
 
-		scene = new Scene(props.font, props.lyrics, ctx, win);
+		scene = new Scene(props.font, props.lyrics, props.color_background, props.colors, ctx, win);
 
 		function draw_animation(): void {
 			scene.update(audio.currentTime);

@@ -19,6 +19,8 @@
 
 <style scoped>
 button {
+	min-width: 16em;
+	min-height: 4em;
 	border: 1px solid #fff;
 	background-color: transparent;
 	color: #fff;

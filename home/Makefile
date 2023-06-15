@@ -2,5 +2,5 @@
 prod:
 	npm run build
 	mkdir dist/lyrics
-	mv dist/{audios,assets,night_dancer.png} dist/lyrics
+	mv dist/{audios,assets} dist/lyrics
 	npm run preview

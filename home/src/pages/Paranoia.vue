@@ -15,16 +15,16 @@
 			{ text: 'asdf', time: 3.0 }
 	];
 	
-	const senbonzakura = {
+	const paranoia = {
 		lyrics: lyric,
 		font: 'Noto Serif JP',
 		color_background: '#eaeaea',
 		colors: ['#e6007d', '#222222'],
 		url: 'audios/night_dancer.mp3'
-		//url: 'senbonzakura.mp3'
+		//url: 'paranoia.mp3'
 	};
 </script>
 
 <template>
-	<Lyrics :fullscreen='true' :lyrics='senbonzakura.lyrics' :font='senbonzakura.font' :color_background='senbonzakura.color_background' :colors='senbonzakura.colors' :url='senbonzakura.url'></Lyrics>
+	<Lyrics :fullscreen='true' :lyrics='paranoia.lyrics' :font='paranoia.font' :color_background='paranoia.color_background' :colors='paranoia.colors' :url='paranoia.url'></Lyrics>
 </template>
