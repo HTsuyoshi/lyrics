@@ -33,7 +33,7 @@
 		lyrics: lyric,
 		font: 'Sawarabi Mincho',
 		color_background: '#323232',
-		colors: ['#e6007d', '#222222'],
+		colors: [ '#e6007d' ],
 		url: 'audios/senbonzakura.mp3'
 	};
 </script>
