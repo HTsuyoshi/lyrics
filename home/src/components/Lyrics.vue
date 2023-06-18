@@ -74,7 +74,10 @@
 		y: 0
 	};
 
-	let color = {
+	let color: {
+		background: string,
+		colors: string[]
+	} = {
 		background: props.color_background,
 		colors: []
 	};
