@@ -1,7 +1,7 @@
 <script setup lang='ts'>
 	import { ref, onMounted } from 'vue';
 	import { onBeforeRouteLeave } from 'vue-router';
-	import { Scene } from '../lib/Lyrics.ts'
+	import { Scene, Menu } from '../lib/Lyrics.ts'
 
 	type Lyric = {
 		text: string;
@@ -23,6 +23,18 @@
 			type: Number,
 			default: 400,
 			validator: (value: number) => Number.isInteger(value)
+		},
+		volume: {
+			type: Number,
+			required: true
+		},
+		title: {
+			type: String,
+			required: true
+		},
+		links: {
+			type: Array<string>,
+			required: true
 		},
 		lyrics: {
 			type: Array<Lyric>,
@@ -55,7 +67,17 @@
 		w2: 150,
 		h: 400,
 		h2: 200
-	}
+	};
+
+	let mouse = {
+		x: 0,
+		y: 0
+	};
+
+	let color = {
+		background: props.color_background,
+		colors: props.colors
+	};
 
 	if (props.fullscreen) {
 		win.w = window.innerWidth;
@@ -70,12 +92,20 @@
 	}
 
 	let scene: Scene;
-	const audio = new Audio(props.url);
-	audio.volume = 0.5;
-	function start(): void {
-		if (audio.paused) audio.play();
-		else audio.pause();
+	let menu: Menu;
 
+	const audio = new Audio(props.url);
+	audio.volume = props.volume;
+	// Debugging
+	//audio.currentTime = 85.0;
+
+	function start(): void {
+		if (audio.paused) {
+			if (!menu.hit_button(mouse)) return;
+			audio.play();
+		} else {
+			audio.pause();
+		}
 		scene.start();
 	}
 
@@ -85,6 +115,14 @@
 		}
 		next();
 	});
+	
+	window.addEventListener (
+		'mousemove',
+		(e) => {
+			mouse.x = e.clientX;
+			mouse.y = e.clientY;
+		}
+	);
 
 	onMounted(() => {
 		const canvas = canvasRef.value;
@@ -114,10 +152,19 @@
 			)
 		}
 
-		scene = new Scene(props.font, props.lyrics, props.color_background, props.colors, ctx, win);
+		audio.addEventListener(
+			'ended',
+			() => {
+				scene = new Scene(props.font, props.lyrics, color, ctx, win);
+			}
+		);
+
+		menu = new Menu(props.font, props.title, props.links, color, ctx, win);
+		scene = new Scene(props.font, props.lyrics, color, ctx, win);
 
 		function draw_animation(): void {
-			scene.update(audio.currentTime);
+			if (audio.paused) menu.update(mouse);
+			else scene.update(audio.currentTime);
 			requestAnimationFrame(draw_animation);
 		}
 

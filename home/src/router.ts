@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from './pages/Home.vue'
 import Night_dancer from './pages/Night_dancer.vue'
-import Senbonzakura from './pages/Senbonzaruka.vue'
+import Senbonzakura from './pages/Senbonzakura.vue'
 import Cupid from './pages/Cupid.vue'
 import Paranoia from './pages/Paranoia.vue'
 

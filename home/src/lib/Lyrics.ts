@@ -85,42 +85,39 @@ export class Shape {
 		this.color = color;
 
 		this.format = get_random(0, 2);
-		this.rotate = Math.random() * 2 + 1.0;
-		this.size = (Math.random() * this.win.w/10) + this.win.w/10;
+		this.rotate = Math.random() * 1.0 + 1.0;
+		this.size = (Math.random() * this.win.w/20) + this.win.w/10;
 		this.p = { x: this.win.w2, y: this.win.h2 };
 		this.d = { x: get_boolean(), y: invert_y };
-		this.distance = { x: get_random(this.win.w2/4, this.win.w2), y: get_random(this.win.h2/2, this.win.h2*3/4) };
+		this.distance = { x: get_random(this.win.w2, this.win.w*3/4), y: get_random(this.win.h2/2, this.win.h2*3/4) };
 		this.speed = get_random(2, 5);
 	}
 
-	private _draw(progress: number): void {
+	private _draw(progress: number, progress_inverse_quint: number): void {
 		let shape_function = draw_circle;
 		if (this.format === 1) shape_function = draw_square;
 		else if (this.format === 2) shape_function = draw_triangle;
-		
-		let progress_inverse = progress;
-		if (progress > 1) progress_inverse = 2 - progress;
 
 		this.ctx.save()
 		this.ctx.translate(this.p.x, this.p.y);
-		this.ctx.rotate(this.rotate * progress/2 * Math.PI);
-		this.ctx.lineWidth = 10 * easeOutQuint(progress_inverse);
-		shape_function(this.ctx, easeOutQuint(progress_inverse), this.size);
+		this.ctx.rotate(this.rotate * progress * Math.PI);
+		this.ctx.lineWidth = 10 * progress_inverse_quint;
+		shape_function(this.ctx, progress_inverse_quint, this.size);
 		this.ctx.restore()
 	}
 
-	private _update_pos(progress: number): void {
+	private _update_pos(progress: number, progress_inverse: number): void {
 		this.p.x = this.win.w2
-				+ (this.d.x ? -1 : 1) * this.win.w2/5 * Math.sin(easeOutN(progress/2, this.speed) * Math.PI)
+				+ (this.d.x ? -1 : 1) * this.win.w2/5 * Math.sin(easeOutN(progress, this.speed) * Math.PI)
 				+ (this.d.x ? -1 : 1) * this.distance.x/2
-				+ (this.d.x ? 1 : -1) * this.distance.x * easeOutN(progress/2, this.speed);
+				+ (this.d.x ? 1 : -1) * this.distance.x * easeOutN(progress, this.speed);
 		this.p.y = this.win.h2
-				+ (this.d.y ? -1 : 1) * this.distance.y * easeOutN((progress > 1) ? 2 - progress : progress, this.speed);
+				+ (this.d.y ? -1 : 1) * this.distance.y * easeOutN(progress_inverse, this.speed);
 	}
 
-	public update(progress: number): void {
-		this._update_pos(progress);
-		this._draw(progress);
+	public update(progress: number, progress_inverse: number, progress_inverse_quint: number): void {
+		this._update_pos(progress, progress_inverse);
+		this._draw(progress, progress_inverse_quint);
 	}
 }
 
@@ -164,7 +161,7 @@ export class Word {
 		this.color = color;
 
 		this.font = font;
-		this.font_size = this.win.w / 10;
+		this.font_size = this.win.w / 14;
 		this.set_word(text);
 
 		// Settings
@@ -179,7 +176,7 @@ export class Word {
 			.map(key => parseInt(key)).length;
 
 		this.draw_style = {
-			side: get_boolean() ? 1 : -1,
+			side: get_random(-1, 1),
 			character: {
 				fill: get_boolean(),
 				outline: get_boolean(),
@@ -188,6 +185,10 @@ export class Word {
 			fill_square: get_random(-1, this.text.length - 1),
 			style: get_random(0, draw_style_length - 1)
 		};
+
+		if (this.ctx.measureText(this.text).width > this.font_size) {
+			this.draw_style.side = 0;
+		}
 
 		if (!(this.draw_style.character.fill && this.draw_style.character.outline)) this.draw_style.character.fill = true;
 
@@ -236,41 +237,46 @@ export class Word {
 			this.ctx.strokeText(this.text, pos.x - 3, pos.y - 3);
 		}
 		if (this.draw_style.stroke_square !== -1) {
-			let text_off = this.ctx.measureText(this.text.substring(0, this.draw_style.stroke_square)).width;
-			const char_width = this.ctx.measureText(this.text[this.draw_style.stroke_square]).width;
-			this.ctx.strokeRect(pos.x + text_off, pos.y - this.square.yi, char_width, this.square.yf);
+			const c = this.text[this.draw_style.stroke_square];
+			if (c !== ' ') {
+				let text_off = this.ctx.measureText(this.text.substring(0, this.draw_style.stroke_square)).width;
+				const char_width = this.ctx.measureText(c).width;
+				this.ctx.strokeRect(pos.x + text_off, pos.y - this.square.yi, char_width, this.square.yf);
+			}
 		}
 		if (this.draw_style.fill_square !== -1) {
-			let text_off = this.ctx.measureText(this.text.substring(0, this.draw_style.fill_square)).width;
-			const char_width = this.ctx.measureText(this.text[this.draw_style.fill_square]).width;
-			this.ctx.fillRect(pos.x + text_off, pos.y - this.square.yi, char_width, this.square.yf);
-			this.ctx.fillStyle = this.color.background;
-			this.ctx.fillText(this.text[this.draw_style.fill_square], pos.x + text_off, pos.y);
-			this.ctx.fillStyle = this.color.colors[0];
+			const c = this.text[this.draw_style.fill_square];
+			if (c !== ' ') {
+				let text_off = this.ctx.measureText(this.text.substring(0, this.draw_style.fill_square)).width;
+				const char_width = this.ctx.measureText(c).width;
+				this.ctx.fillRect(pos.x + text_off, pos.y - this.square.yi, char_width, this.square.yf);
+				this.ctx.fillStyle = this.color.background;
+				this.ctx.fillText(this.text[this.draw_style.fill_square], pos.x + text_off, pos.y);
+				this.ctx.fillStyle = this.color.colors[0];
+			}
 		}
 	}
 
-	private _draw_text_1(progress: number): void {
+	private _draw_text_1(progress_step: number): void {
 		let pos = {
 			x: - this.ctx.measureText(this.text).width/2,
 			y: this.actual_font_size/4
 		}
 		for (let i=-2; i<=2; ++i) {
-			this.ctx.strokeText(this.text, pos.x + i * (this.win.w/10), pos.y + i * (this.win.h/10) * this.draw_style.side);
+			this.ctx.strokeText(this.text, pos.x + i * (this.font_size) * this.draw_style.side, pos.y + i * (this.font_size));
 		}
-		const i = Math.floor(progress*2.5) - 2;
-		this.ctx.fillText(this.text, pos.x + i * (this.win.w/10), pos.y + i * (this.win.h/10) * this.draw_style.side);
+		const i = progress_step - 2;
+		this.ctx.fillText(this.text, pos.x + i * (this.font_size) * this.draw_style.side, pos.y + i * (this.font_size));
 	}
 
-	private _draw(progress: number): void {
-		const ease_progress = easeOutQuint(progress);
-		const progress_inverse = (progress > 1) ? 2 - ease_progress : ease_progress;
+	private _draw(progress_inverse_quint: number,
+				  progress_step: number): void {
 
 		this.ctx.save();
 		this.ctx.translate(this.win.w2, this.win.h2);
 		switch (this.draw_style.style) {
 			case WORD_STYLE.DEFAULT: {
-				this.actual_font_size = this.font_size * progress_inverse;
+				this.actual_font_size = this.font_size * progress_inverse_quint;
 				this.square.yf = this.actual_font_size * 0.9;
 				this.square.yi = this.actual_font_size * 0.8;
 				this.ctx.font = `${this.actual_font_size}px ${this.font}`;
@@ -280,16 +286,16 @@ export class Word {
 			case WORD_STYLE.OUTLINE : {
 				this.actual_font_size = this.font_size;
 				this.ctx.font = `${this.actual_font_size}px ${this.font}`;
-				this._draw_text_1(progress);
+				this._draw_text_1(progress_step);
 				break;
 			}
 		}
 		this.ctx.restore();
 	}
 
-	public update(progress: number): void {
+	public update(progress_inverse_quint: number, progress_step: number): void {
 		this.font_size = Math.min(this.win.w/10, this.win.h/10);
-		this._draw(progress);
+		this._draw(progress_inverse_quint, progress_step);
 	}
 }
 
@@ -301,9 +307,14 @@ export class Line {
 	r: boolean; // vert or horz
 	p_1: { x: number, y: number };
 	p_2: { x: number, y: number };
+	options: {
+		color_vel: boolean,
+		vel: number
+	};
 
 	constructor(color: { background: string, colors: string[] },
-				ctx: CanvasRenderingContext2D, win: { w: number, w2: number, h: number, h2: number }) {
+				ctx: CanvasRenderingContext2D, win: { w: number, w2: number, h: number, h2: number },
+				options: { color_vel: boolean, vel: number }) {
 		this.ctx = ctx;
 		this.win = win;
 		this.color = color;
@@ -318,10 +329,15 @@ export class Line {
 			x: (this.r ? Math.random() * this.win.w : this.win.w),
 			y: (this.r ? this.win.h : Math.random() * this.win.h)
 		};
+		this.options = options;
 	}
 
-	private _draw(progress: number): void {
-		this.ctx.strokeStyle = colorTransition((progress/2) * Math.abs(this.vel), this.color.background, this.color.colors[0]);
+	private _draw(progress_quint: number): void {
+		if (this.options.color_vel) {
+			this.ctx.strokeStyle = colorTransition((progress_quint/2) * Math.abs(this.vel), this.color.background, this.color.colors[0]);
+		} else {
+			this.ctx.strokeStyle = this.color.colors[0];
+		}
 		this.ctx.beginPath();
 		this.ctx.moveTo(this.p_1.x, this.p_1.y);
 		this.ctx.lineTo(this.p_2.x, this.p_2.y);
@@ -329,9 +345,8 @@ export class Line {
 		this.ctx.strokeStyle = this.color.colors[0];
 	}
 
-	public update(progress: number): void {
-		const ease_progress = easeOutQuint(progress);
-		const speed = 5 * this.vel * ease_progress;
+	public update(progress_quint: number): void {
+		const speed = this.options.vel * this.vel * progress_quint;
 		if (this.r) {
 			this.p_1.x += speed;
 			this.p_2.x += speed;
@@ -339,7 +354,7 @@ export class Line {
 			this.p_1.y += speed;
 			this.p_2.y += speed;
 		}
-		this._draw(ease_progress);
+		this._draw(progress_quint);
 	}
 }
 
@@ -368,23 +383,21 @@ export class Background {
 		this._setup_style();
 	}
 
-	private _draw_vertical(progress_inverse: number): void {
-		const rect_size = easeOutCubic(progress_inverse) * this.win.h * 0.2;
+	private _draw_vertical(progress_inverse_quint: number): void {
+		const rect_size = progress_inverse_quint * this.win.h * 0.2;
 		this.color.colors[0];
 		this.ctx.fillRect(0, 0, this.win.w, this.win.h2 - rect_size/2);
 		this.ctx.fillRect(0, this.win.h2 + rect_size/2,
 						this.win.w, this.win.h2 - rect_size/2);
 	}
 
-	private _draw(progress: number) {
-		let progress_inverse = progress;
-		if (progress > 1) progress_inverse = 2 - progress;
+	private _draw(progress_inverse_quint: number) {
 		if (this.draw_style == 1)
-			this._draw_vertical(progress_inverse);
+			this._draw_vertical(progress_inverse_quint);
 	}
 
-	public update(progress: number) {
-		this._draw(progress);
+	public update(progress_inverse_quint: number) {
+		this._draw(progress_inverse_quint);
 	}
 }
 
@@ -402,7 +415,14 @@ export class Scene {
 		total_time: number
 	};
 	options: {
-		progress: number,
+		progress: {
+			default: number,
+			quint: number,
+			inverse: number,
+			inverse_quint: number,
+			inverse_cubic: number,
+			step: number
+		},
 		play: boolean,
 		color: {
 			background: string;
@@ -418,17 +438,21 @@ export class Scene {
 
 		
 	constructor(font: string, lyrics: Lyric[],
-				color_background: string, colors: string[],
+				color: { background: string, colors: string[] },
 				ctx: CanvasRenderingContext2D, win: { w: number, w2: number, h: number, h2: number }) {
 		this.ctx = ctx;
 		this.win = win;
 		this.options = {
-			progress: 0.0,
+			progress: {
+				default: 0.0,
+				quint: 0.0,
+				inverse: 0.0,
+				inverse_quint: 0.0,
+				inverse_cubic: 0.0,
+				step: 0.0
+			},
 			play: false,
-			color: {
-				background: color_background,
-				colors: colors
-			}
+			color: color
 		};
 		this._set_color_style();
 
@@ -470,7 +494,11 @@ export class Scene {
 		for (let i=0; i<get_random(1,8); i++)
 			this.render.lines.push(new Line(this.options.color,
 											this.ctx,
-											this.win));
+											this.win,
+											{
+												color_vel: true,
+												vel: 5
+											}));
 	}
 
 	private _reset_shapes(): void {
@@ -509,10 +537,16 @@ export class Scene {
 		this.ctx.fillStyle = this.options.color.background;
 		this.ctx.fillRect(0, 0, this.win.w, this.win.h);
 		this._set_color_style();
-		if (this.render.word.can_line()) for (let l of this.render.lines) l.update(this.options.progress);
-		if (this.render.word.can_shape()) for (let s of this.render.shapes) s.update(this.options.progress);
-		this.render.word.update(this.options.progress);
-		if (this.render.word.can_background()) this.render.background.update(this.options.progress);
+		if (this.render.word.can_line()) for (let l of this.render.lines)
+			l.update(this.options.progress.quint);
+		if (this.render.word.can_shape()) for (let s of this.render.shapes)
+			s.update(this.options.progress.default,
+					this.options.progress.inverse,
+					this.options.progress.inverse_quint);
+		this.render.word.update(this.options.progress.inverse_quint,
+							   this.options.progress.step);
+		if (this.render.word.can_background())
+			this.render.background.update(this.options.progress.inverse_quint);
 	}
 
 	public update(time: number): void {
@@ -523,12 +557,162 @@ export class Scene {
 		}
 
 		const time_wait = this.lyrics.lyrics[this.lyrics.index].time;
-		const current_time = ((time - time_gap) % this.lyrics.total_time)
+		const current_time = time - time_gap;
+
 		if (current_time > time_wait) {
 			this._reset();
+			return;
 		} else {
-			this.options.progress = (current_time * 2) / time_wait;
+			const progress = (current_time * 2) / time_wait;
+			const progress_inverse = (progress > 1) ? 2 - progress : progress;
+			this.options.progress = {
+				default: progress/2,
+				quint: easeOutQuint(progress/2),
+				inverse: progress_inverse,
+				inverse_quint: easeOutQuint(progress_inverse),
+				inverse_cubic: easeOutCubic(progress_inverse),
+				step: Math.floor(progress * 2.5)
+			};
 		}
 		this._draw();
+	}
+}
+
+export class Menu {
+	ctx: CanvasRenderingContext2D;
+	win: { w: number, w2: number, h: number, h2: number }
+	font: string;
+	title: string;
+	links: string[];
+	color: {
+		background: string,
+		colors: string[]
+	};
+	button: {
+		offset: number,
+		size: number
+	};
+	lines!: Line[];
+	progress!: number;
+
+	constructor(font: string, title: string, links: string[],
+				color: { background: string, colors: string[]},
+				ctx: CanvasRenderingContext2D,
+				win: { w: number, w2: number, h: number, h2: number }) {
+		this.ctx = ctx;
+		this.win = win;
+		this.font = font;
+		this.title = title;
+		this.links = links;
+		this.color = color;
+		this.button =  {
+			offset: 3,
+			size: 0
+		};
+		this._setup_lines();
+	}
+
+	private _draw_title(): void {
+		this.ctx.fillText(this.title, this.win.w2 - this.ctx.measureText(this.title).width/2, this.win.h2 - 200);
+	}
+
+	private _draw_links(): void {
+		for (let i=0; i<this.links.length; ++i)
+			this.ctx.fillText(this.links[i],
+							  this.win.w2 - this.ctx.measureText(this.links[i]).width/2,
+							  this.win.h2 + 200 + 50 * i);
+	}
+
+	private _draw_play(): void {
+		const icon_size = Math.max(this.win.w/14, this.win.h/14);
+		this.ctx.fillStyle = this.color.background;
+		const size2 = icon_size/2;
+		const size_sqrt_33 = icon_size * Math.sqrt(3)/6;
+		const offset = {
+			x: this.win.w2 - size_sqrt_33/2,
+			y: this.win.h2
+		};
+		this.ctx.beginPath();
+		this.ctx.moveTo(offset.x + size_sqrt_33 * 2, offset.y);
+		this.ctx.lineTo(offset.x -size_sqrt_33,      offset.y + size2);
+		this.ctx.lineTo(offset.x -size_sqrt_33,      offset.y - size2);
+		this.ctx.lineTo(offset.x + size_sqrt_33 * 2, offset.y);
+		this.ctx.lineTo(offset.x -size_sqrt_33,      offset.y + size2);
+		this.ctx.fill();
+	}
+
+	private _is_inside_button(mouse: {x: number, y: number}): boolean {
+		if (mouse.x < this.win.w2 + this.button.size/2 &&
+			mouse.x > this.win.w2 - this.button.size/2 &&
+			mouse.y < this.win.h2 + this.button.size/2 &&
+			mouse.y > this.win.h2 - this.button.size/2) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	private _draw_buttons(mouse: { x: number, y: number }): void {
+		this.button.size = Math.max(this.win.w/8, this.win.h/8);
+		if (this._is_inside_button(mouse)) {
+			if (this.button.offset < 10)
+				this.button.offset += 1;
+		} else {
+			if (this.button.offset > 4)
+				this.button.offset -= 1;
+		}
+		this.ctx.fillStyle = this.color.colors[0];
+		this.ctx.strokeStyle = this.color.colors[0];
+		this.ctx.fillRect(this.win.w2 - this.button.size/2,
+						  this.win.h2 - this.button.size/2,
+						  this.button.size,
+						  this.button.size);
+		this.ctx.strokeRect(this.win.w2 - this.button.size/2 + this.button.offset,
+						  this.win.h2 - this.button.size/2 + this.button.offset,
+						  this.button.size,
+						  this.button.size);
+		this.ctx.strokeRect(this.win.w2 - this.button.size/2 - this.button.offset,
+						  this.win.h2 - this.button.size/2 - this.button.offset,
+						  this.button.size,
+						  this.button.size);
+		this._draw_play();
+	}
+
+	private _setup_lines(): void {
+		this.progress = 0.0;
+		this.lines = [];
+		for (let i=0; i<get_random(4,8); i++)
+			this.lines.push(new Line(this.color,
+									this.ctx,
+									this.win,
+									{
+										color_vel: false,
+										vel: 0.05
+									}));
+	}
+
+	private _draw(mouse: { x: number, y: number }): void {
+		this.ctx.fillStyle = this.color.background;
+		this.ctx.fillRect(0, 0, this.win.w, this.win.h);
+		for (let l of this.lines) l.update(this.progress);
+		this._draw_buttons(mouse);
+		this.ctx.fillStyle = this.color.colors[0];
+		this.ctx.font = `50px ${this.font}`;
+		this._draw_title();
+		this.ctx.font = `25px ${this.font}`;
+		this._draw_links();
+	}
+
+	public update(mouse: { x: number, y: number }): void {
+		this.progress += 0.01;
+		this._draw(mouse);
+	}
+
+	public hit_button(mouse: {x: number, y: number}): boolean {
+		if (this._is_inside_button(mouse)) {
+			this._setup_lines();
+			return true;
+		}
+		return false;
 	}
 }

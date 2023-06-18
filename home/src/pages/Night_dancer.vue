@@ -29,23 +29,23 @@
 			{ text: '夜だけど', time: 1.5 },
 			{ text: 'あーあ', time: 1.0 },
 			{ text: '二人', time: 0.8 },
-			{ text: '刻もう', time: 1.0 }
+			{ text: '刻もう', time: 1.6 }
 	];
 	
-	const night_dancer = {
+	const music = {
+		volume: 0.5,
+		title: 'Night dancer',
+		links: [ '@Imase', '@ShaniaYan'],
 		lyrics: lyric,
-		font: 'Arial',
-		color_background: '#eaeaea',
-		colors: ['#323232', '#fffd06', '#00fefe'],
+		font: 'Montserrat',
+		color_background: '#323232',
+		colors: ['#fffd06', '#00fefe'],
 		url: 'audios/night_dancer.mp3'
 	};
-
-	const link_1 = 'https://www.youtube.com/channel/UC4Kape5ARQ-konOZSw2yawA';
-	const link_2 = 'https://www.youtube.com/@ShaniaYan';
-	console.log(link_1);
-	console.log(link_2);
 </script>
 
 <template>
-	<Lyrics :fullscreen='true' :lyrics='night_dancer.lyrics' :font='night_dancer.font' :color_background='night_dancer.color_background' :colors='night_dancer.colors' :url='night_dancer.url'></Lyrics>
+	<link rel='preload' href='https://fonts.googleapis.com/css2?family=Montserrat&display=swap' as='style'>
+	<link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Montserrat&display=swap'>
+	<Lyrics :fullscreen='true' :volume='music.volume' :title='music.title' :links='music.links' :lyrics='music.lyrics' :font='music.font' :color_background='music.color_background' :colors='music.colors' :url='music.url'></Lyrics>
 </template>
