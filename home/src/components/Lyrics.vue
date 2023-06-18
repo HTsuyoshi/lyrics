@@ -1,7 +1,7 @@
 <script setup lang='ts'>
 	import { ref, onMounted } from 'vue';
 	import { onBeforeRouteLeave } from 'vue-router';
-	import { Scene, Menu } from '../lib/Lyrics.ts'
+	import { Scene, Menu, get_random } from '../lib/Lyrics.ts'
 
 	type Lyric = {
 		text: string;
@@ -76,8 +76,11 @@
 
 	let color = {
 		background: props.color_background,
-		colors: props.colors
+		colors: []
 	};
+
+	for (let c of props.colors)
+		color.colors.splice(get_random(0, color.colors.length), 0, c);
 
 	if (props.fullscreen) {
 		win.w = window.innerWidth;

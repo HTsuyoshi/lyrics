@@ -13,12 +13,13 @@
 
 <template>
 	<router-link :to='link' >
-	<button>{{ title }}</button>
+			{{ title }}
 	</router-link>
 </template>
 
 <style scoped>
-button {
+a {
+	text-decoration: none;
 	min-width: 16em;
 	min-height: 4em;
 	border: 1px solid #fff;
@@ -26,5 +27,13 @@ button {
 	color: #fff;
 	padding: 1em;
 	margin: 1em;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	transition: background-color .5s, color .5s;
+}
+a:hover {
+	background-color: #fff;
+	color: var(--background);
 }
 </style>

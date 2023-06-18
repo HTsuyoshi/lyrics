@@ -108,8 +108,8 @@
 		lyrics: lyric,
 		font: 'AoyagiSosekiFont2OTF',
 		// Hannari
-		color_background: '#eaeaea',
-		colors: ['#e6007d', '#222222'],
+		color_background: '#323232',
+		colors: [ '#de3afd' ],
 		url: 'audios/paranoia.mp3'
 	};
 
