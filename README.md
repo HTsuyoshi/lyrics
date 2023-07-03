@@ -2,9 +2,13 @@
 
 The project uses canvas to enhance the aesthetic appeal of lyrics through the artful integration of typography and dynamic motion design.
 
+### Preview
+
+Try the application in the following [link](https://playground.htsuyoshiy.online/lyrics) :D
+
 ## Easing functions
 
-One of all the gols of this project was to get a better understanding of the [easing functions](https://easings.net/].
+One of all the gols of this project was to get a better understanding of the [easing functions](https://easings.net/).
 
 The easing functions were used to create the smoothness in the movements of the shapes and the lyrics:
 
@@ -43,7 +47,3 @@ const music = {
     url: 'audios/cupid.mp3'
 };
 ```
-
-### Preview
-
-Try the application in the following [link](https://playground.htsuyoshiy.online/lyrics) :D
