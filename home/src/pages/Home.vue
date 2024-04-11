@@ -8,10 +8,10 @@
 			Lyrics visualization
 		</h1>
 		<div id='buttons'>
-			<Button link='/lyrics/night_dancer' title='Night Dancer (ナイトダンサー)'></Button>
-			<Button link='/lyrics/senbonzakura' title='Senbonzakura (千本桜)'></Button>
-			<Button link='/lyrics/cupid' title='Cupid'></Button>
-			<Button link='/lyrics/paranoia' title='Paranoia (パラノイア)'></Button>
+			<Button link='/night_dancer' title='Night Dancer (ナイトダンサー)'></Button>
+			<Button link='/senbonzakura' title='Senbonzakura (千本桜)'></Button>
+			<Button link='/cupid' title='Cupid'></Button>
+			<Button link='/paranoia' title='Paranoia (パラノイア)'></Button>
 
 		</div>
 	</div>

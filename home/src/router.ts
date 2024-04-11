@@ -8,27 +8,27 @@ import Paranoia from './pages/Paranoia.vue'
 const router = createRouter({
 	history: createWebHistory(),
 	routes: [ {
-			path: '/lyrics',
+			path: '/',
 			name: 'Home',
 			component: Home
 		},
 		{
-			path: '/lyrics/night_dancer',
+			path: '/night_dancer',
 			name: 'Night_dancer',
 			component: Night_dancer
 		},
 		{
-			path: '/lyrics/senbonzakura',
+			path: '/senbonzakura',
 			name: 'Senbonzakura',
 			component: Senbonzakura
 		},
 		{
-			path: '/lyrics/cupid',
+			path: '/cupid',
 			name: 'Cupid',
 			component: Cupid
 		},
 		{
-			path: '/lyrics/paranoia',
+			path: '/paranoia',
 			name: 'Paranoia',
 			component: Paranoia
 		},

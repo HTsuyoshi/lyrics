@@ -1,6 +1,6 @@
 .PHONY: 'prod'
 prod:
 	npm run build
-	mkdir dist/lyrics
-	mv dist/{audios,assets} dist/lyrics
+	mkdir dist
+	mv dist/{audios,assets} dist
 	npm run preview
