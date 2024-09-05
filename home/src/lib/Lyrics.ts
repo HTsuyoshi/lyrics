@@ -187,7 +187,7 @@ export class Word {
 						}
 						if (!(this.draw_style.character.fill && this.draw_style.character.outline)) this.draw_style.character.fill = true;
 						this.square = { yi: 0, yf: 0 }
-					} else if (WORD_STYLE.OUTLINE) {
+					} else if (style == WORD_STYLE.OUTLINE) {
 						this.draw_style = {
 							character: {
 								fill: false,
@@ -262,7 +262,7 @@ export class Word {
 								  this.square.yi = this.actual_font_size * 0.8;
 								  this.ctx.font = `${this.actual_font_size}px ${this.font}`;
 								  this._draw_text_default();
-								  } else if (WORD_STYLE.OUTLINE) {
+								  } else if (this.draw_style.style = WORD_STYLE.OUTLINE) {
 									  this.actual_font_size = this.font_size;
 									  this.ctx.font = `${this.actual_font_size}px ${this.font}`;
 									  this._draw_text_1(progress_step);
